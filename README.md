@@ -1,56 +1,50 @@
-# Ecommify_Database_Design
+# Ecommify: Diseño de Base de Datos Relacional Avanzado y Arquitectura Híbrida
 
-Ecommify: Diseño de Base de Datos Relacional Avanzado
-1. Descripción del Proyecto
-Este repositorio contiene el diseño conceptual, lógico e implementación preliminar del módulo transaccional de Ecommify. El objetivo principal es desarrollar una arquitectura de software compleja que integre innovación y sostenibilidad utilizando PostgreSQL como motor principal y MongoDB para cargas de datos específicas.
+Este proyecto forma parte de la **Unidad 2: PostgreSQL - Diseño relacional avanzado**. Se enfoca en el desarrollo del módulo transaccional de una plataforma de E-commerce, utilizando el dataset de **Olist (Brazilian E-commerce)** como base de datos de referencia.
 
-2. Estructura del Repositorio
-Siguiendo los lineamientos de la guía de actividades, el proyecto se organiza de la siguiente manera:
+## 1. Resumen Técnico (Abstract)
+Ecommify utiliza una arquitectura de base de datos políglota para equilibrar la integridad transaccional y la escalabilidad analítica. Se ha implementado **PostgreSQL** como motor principal para el núcleo de negocio (pedidos, pagos, inventario) cumpliendo con las propiedades **ACID**, e integrando **MongoDB** para el catálogo extendido y reseñas, siguiendo el modelo **BASE**. El diseño destaca por el uso de tipos de datos avanzados como `JSONB`, `Arrays` y extensiones geoespaciales (`PostGIS`).
 
-Ecommify_Database_Design/
-├── README.md                        # Descripción y guía del proyecto [cite: 114]
-├── docs/                            # Documentación técnica obligatoria [cite: 115]
-│   ├── Documento_Tecnico_Diseno.pdf  # Diseño conceptual y lógico [cite: 116]
-│   └── Presentacion_Ejecutiva.pdf    # Resumen para sustentación [cite: 117]
-├── postgresql/                      # Módulo relacional PostgreSQL [cite: 118]
-│   ├── schema/                      # Scripts DDL (Tablas, Particiones) [cite: 119]
-│   ├── seed_data/                   # Datos de prueba [cite: 120]
-│   └── queries/                     # Consultas avanzadas (JSONB, Arrays) [cite: 121]
-├── mongodb/                         # Módulo NoSQL MongoDB [cite: 122]
-│   └── schema/                      # Esquema de documentos [cite: 123]
-└── notebooks/                       # Análisis de datos [cite: 124]
-    └── Data_Exploration_Analysis.ipynb # EDA del dataset Olist [cite: 125]
+## 2. Modelo Entidad-Relación (3FN)
+El modelo ha sido normalizado a **Tercera Forma Normal (3FN)** para eliminar redundancias y asegurar la integridad referencial.
+
+### Entidades Clave:
+* **Customers:** Almacena perfiles de clientes con datos geolocalizados mediante PostGIS.
+* **Orders:** Entidad central particionada por rangos de fecha para optimizar el rendimiento de consultas históricas.
+* **Products:** Implementa un esquema flexible mediante `JSONB` para especificaciones técnicas y `ARRAY` para galerías multimedia.
+* **Payments:** Gestiona el flujo financiero con soporte multi-método (tarjeta, boleto, etc.).
 
 
-3. Decisiones Técnicas Destacadas
-Implementación en PostgreSQL
-Se han seleccionado tipos de datos avanzados para optimizar el rendimiento y la flexibilidad del esquema:
 
-JSONB: Para almacenar especificaciones de productos (product_specifications).  
+## 3. Justificación de Decisiones Arquitectónicas
 
+### ¿Por qué PostgreSQL para el Core?
+Se seleccionó PostgreSQL por su robustez transaccional y capacidad de extenderse mediante:
+* **Extensiones:** `PostGIS` para calcular costos de envío por distancia y `pg_trgm` para búsquedas "fuzzy" en el buscador.
+* **Tipos Avanzados:** Uso de `JSONB` para permitir que diferentes categorías de productos tengan atributos únicos sin alterar el esquema (Esquema-Flexible).
+* **Escalabilidad:** Particionamiento de tablas para separar datos "calientes" (pedidos recientes) de datos "fríos" (historial).
 
-ARRAY TEXT[]: Para la gestión de múltiples fotos de productos (product_photos).  
+### Matriz PostgreSQL vs MongoDB (Teorema CAP)
+| Criterio | PostgreSQL | MongoDB |
+| :--- | :--- | :--- |
+| **Módulos** | Pedidos, Pagos, Inventario. | Reseñas, Logs, Catálogo. |
+| **Teorema CAP** | Consistencia (C) - Disponibilidad (A) | Disponibilidad (A) - Partición (P) |
+| **Justificación** | Necesidad de transacciones ACID. | Escalabilidad para datos masivos. |
 
-
-TSTZRANGE: Para definir periodos de promociones (promotion_period).  
-
-
-PostGIS: Extensión utilizada para el cálculo de costos de envío basados en geolocalización.  
-
-
-pg_trgm: Extensión para búsqueda de productos con tolerancia a errores tipográficos.
-
-Arquitectura Híbrida y Cargas OLTP/OLAP
-
-Particionamiento: La tabla de órdenes (Orders) se ha diseñado con particiones por fecha para manejar datos históricos ("hot/cold partitions").  
-
-
-Vistas Materializadas: Implementación de mv_sales_by_category_monthly para dashboards analíticos sin afectar el rendimiento transaccional.  
+## 4. Análisis Exploratorio de Datos (EDA)
+El EDA realizado sobre el dataset de Olist permitió identificar:
+1.  **Calidad:** Tratamiento de valores nulos en el flujo logístico.
+2.  **Patrones Temporales:** Picos de venta estacionales que justifican el uso de **Vistas Materializadas** para reportes mensuales.
+3.  **Outliers:** Detección de precios atípicos que requieren reglas de validación en la capa de base de datos.
 
 
-Sincronización: Se definen triggers para el mantenimiento automático de auditoría (updated_at).
 
-
-4. Requisitos de Evaluación (Rúbrica)Este repositorio cumple con los siguientes criterios de excelencia:  Modelo ER Normalizado: Diseño en 3FN con entidades y relaciones claras.  Justificación Técnica: Análisis detallado de ACID vs BASE y uso de extensiones.  EDA: Análisis completo del dataset Brazilian E-commerce en Google Colab.  Matriz de Decisiones: Justificación del uso de PostgreSQL vs MongoDB bajo el Teorema CAP.  5. ReferenciasPostgreSQL 16 Documentation: Data Types.  PostgreSQL 16 Documentation: Extending SQL
-
-
+## 5. Estructura del Repositorio
+```text
+├── docs/                            # Documentos de diseño y presentación
+├── postgresql/                      # Scripts de base de datos relacional
+│   ├── schema/                      # DDL (Tablas, Particiones, Extensiones)
+│   ├── seed_data/                   # Datos de prueba para validación
+│   └── queries/                     # Consultas avanzadas (JSONB, PostGIS)
+├── mongodb/                         # Esquemas NoSQL para reseñas
+└── notebooks/                       # Análisis Exploratorio (Google Colab)
