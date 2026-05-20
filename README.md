@@ -1,3 +1,56 @@
 # Ecommify_Database_Design
 
-Ecommify: Diseño Relacional Avanzado y Arquitectura HíbridaDescripción del ProyectoEste repositorio contiene el diseño conceptual, lógico y la implementación preliminar de la base de datos para Ecommify, una plataforma de e-commerce basada en el dataset de Olist (Brazilian E-commerce). El proyecto se enfoca en el uso de capacidades avanzadas de PostgreSQL para el módulo transaccional y MongoDB para el módulo analítico y de catálogo flexible.  Estructura del RepositorioSiguiendo los lineamientos de la guía de actividades, el repositorio se organiza de la siguiente manera:  docs/: Contiene el Documento Técnico de Diseño y la Presentación Ejecutiva con el análisis de decisiones.  postgresql/: Scripts DDL, definición de tipos avanzados (JSONB, Arrays, Ranges) y extensiones (PostGIS, pg_trgm).  mongodb/: Esquemas de documentos JSON y patrones de modelado para el catálogo NoSQL.  notebooks/: Análisis Exploratorio de Datos (EDA) realizado en Google Colab sobre el dataset original.  Decisiones Arquitectónicas ClavePara alcanzar los objetivos de aprendizaje de la unidad, se implementaron las siguientes características:  1. PostgreSQL (Módulo Transaccional - ACID)Tipos Avanzados: Uso de JSONB para especificaciones dinámicas de productos, ARRAY para galerías de fotos y TSTZRANGE para periodos de promociones.  Extensiones: Implementación de PostGIS para optimizar costos de envío por distancia y pg_trgm para búsquedas de productos tolerantes a errores.  Escalabilidad: Particionamiento de la tabla Orders por fecha para manejo eficiente de cargas híbridas OLTP/OLAP.  2. MongoDB (Módulo NoSQL - BASE)Justificación: Utilizado para datos de alta variabilidad y volumen como reseñas de usuarios y metadatos de productos, priorizando la disponibilidad según el Teorema CAP.  Requisitos de InstalaciónPostgreSQL 16+: Es necesario para el soporte de tipos de datos avanzados y sintaxis de particionamiento.  PostGIS: Extensión instalada en la base de datos para funciones geoespaciales.  Python 3.x: Para ejecutar el notebook de análisis exploratorio (EDA).  AutoresEquipo de Desarrollo Ecommify - Unidad 2: PostgreSQL: Diseño relacional avanzado.  
+Ecommify: Diseño de Base de Datos Relacional Avanzado
+1. Descripción del Proyecto
+Este repositorio contiene el diseño conceptual, lógico e implementación preliminar del módulo transaccional de Ecommify. El objetivo principal es desarrollar una arquitectura de software compleja que integre innovación y sostenibilidad utilizando PostgreSQL como motor principal y MongoDB para cargas de datos específicas.
+
+2. Estructura del Repositorio
+Siguiendo los lineamientos de la guía de actividades, el proyecto se organiza de la siguiente manera:
+
+Ecommify_Database_Design/
+├── README.md                        # Descripción y guía del proyecto [cite: 114]
+├── docs/                            # Documentación técnica obligatoria [cite: 115]
+│   ├── Documento_Tecnico_Diseno.pdf  # Diseño conceptual y lógico [cite: 116]
+│   └── Presentacion_Ejecutiva.pdf    # Resumen para sustentación [cite: 117]
+├── postgresql/                      # Módulo relacional PostgreSQL [cite: 118]
+│   ├── schema/                      # Scripts DDL (Tablas, Particiones) [cite: 119]
+│   ├── seed_data/                   # Datos de prueba [cite: 120]
+│   └── queries/                     # Consultas avanzadas (JSONB, Arrays) [cite: 121]
+├── mongodb/                         # Módulo NoSQL MongoDB [cite: 122]
+│   └── schema/                      # Esquema de documentos [cite: 123]
+└── notebooks/                       # Análisis de datos [cite: 124]
+    └── Data_Exploration_Analysis.ipynb # EDA del dataset Olist [cite: 125]
+
+
+3. Decisiones Técnicas Destacadas
+Implementación en PostgreSQL
+Se han seleccionado tipos de datos avanzados para optimizar el rendimiento y la flexibilidad del esquema:
+
+JSONB: Para almacenar especificaciones de productos (product_specifications).  
+
+
+ARRAY TEXT[]: Para la gestión de múltiples fotos de productos (product_photos).  
+
+
+TSTZRANGE: Para definir periodos de promociones (promotion_period).  
+
+
+PostGIS: Extensión utilizada para el cálculo de costos de envío basados en geolocalización.  
+
+
+pg_trgm: Extensión para búsqueda de productos con tolerancia a errores tipográficos.
+
+Arquitectura Híbrida y Cargas OLTP/OLAP
+
+Particionamiento: La tabla de órdenes (Orders) se ha diseñado con particiones por fecha para manejar datos históricos ("hot/cold partitions").  
+
+
+Vistas Materializadas: Implementación de mv_sales_by_category_monthly para dashboards analíticos sin afectar el rendimiento transaccional.  
+
+
+Sincronización: Se definen triggers para el mantenimiento automático de auditoría (updated_at).
+
+
+4. Requisitos de Evaluación (Rúbrica)Este repositorio cumple con los siguientes criterios de excelencia:  Modelo ER Normalizado: Diseño en 3FN con entidades y relaciones claras.  Justificación Técnica: Análisis detallado de ACID vs BASE y uso de extensiones.  EDA: Análisis completo del dataset Brazilian E-commerce en Google Colab.  Matriz de Decisiones: Justificación del uso de PostgreSQL vs MongoDB bajo el Teorema CAP.  5. ReferenciasPostgreSQL 16 Documentation: Data Types.  PostgreSQL 16 Documentation: Extending SQL
+
+
