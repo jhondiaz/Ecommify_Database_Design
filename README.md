@@ -41,10 +41,29 @@ El EDA realizado sobre el dataset de Olist permitió identificar:
 
 ## 5. Estructura del Repositorio
 ```text
-├── docs/                            # Documentos de diseño y presentación
-├── postgresql/                      # Scripts de base de datos relacional
-│   ├── schema/                      # DDL (Tablas, Particiones, Extensiones)
-│   ├── seed_data/                   # Datos de prueba para validación
-│   └── queries/                     # Consultas avanzadas (JSONB, PostGIS)
-├── mongodb/                         # Esquemas NoSQL para reseñas
-└── notebooks/                       # Análisis Exploratorio (Google Colab)
+├── docs/                             # Documentos de diseño y presentación
+├── postgresql/                       # Scripts de base de datos relacional
+│   ├── schema/                       # DDL (Tablas, Particiones, Extensiones)
+│   ├── seed_data/                    # Datos de prueba para validación
+│   └── queries/                      # Consultas avanzadas (JSONB, PostGIS)
+├── mongodb/                          # Esquemas NoSQL para reseñas y catálogo
+│   └── schema/                       # Definiciones de catálogo de productos
+├── notebooks/                        # Análisis Exploratorio (Google Colab)
+├── informe_arquitectura_final_U6.md  # [NUEVO] Informe técnico, benchmarking y CAP (U6)
+└── plan_escalamiento_produccion_U6.md # [NUEVO] Plan de escalamiento 10x, migración y CI/CD (U6)
+```
+
+## 6. Unidad 6: Arquitectura, Benchmarking y Selección de Tecnologías
+Como parte del cierre del diseño e infraestructura de Ecommify, se han consolidado las especificaciones del sistema híbrido relacional/NoSQL en dos artefactos clave:
+
+1.  **[Informe Técnico de Arquitectura y Evaluación Comparativa](file:///E:/MAESTRIA/Base%20de%20datos/Ecommify_Database_Design/informe_arquitectura_final_U6.md):**
+    *   **Benchmarking (Simulado):** Evaluación de rendimiento bajo alta concurrencia de tipo *Black Friday* mediante la **Ley de Little** (\(L = \lambda \times W\)). Contrasta PostgreSQL (Supabase) y MongoDB (Atlas) en throughput, latencia y tasa de errores con cargas de 10k, 50k y 100k+ VUs.
+    *   **Identificación de Bottlenecks:** Telemetría de agotamiento de conexiones físicas, saturación de WAL y bloqueos en caliente en PostgreSQL; desalojo de páginas por WiredTiger Cache y contención en documentos en MongoDB.
+    *   **Matriz de Selección:** Evaluación funcional para el Core transaccional (PostgreSQL), Catálogo polimórfico (MongoDB), Analítica masiva (MongoDB) y Logística geoespacial (PostgreSQL + PostGIS).
+    *   **Teorema CAP:** Justificación del modelo transaccional CP y del catálogo AP con simulación lógica de fallas distribuidas (caída de red inter-AZ con quórum de elecciones y mitigación del desfase de réplicas asíncronas).
+
+2.  **[Recomendaciones Estratégicas y Plan de Escalamiento 10x](file:///E:/MAESTRIA/Base%20de%20datos/Ecommify_Database_Design/plan_escalamiento_produccion_U6.md):**
+    *   **Estrategia de Escalamiento:** Escalamiento vertical (instancias dedicadas con IOPS provisionados en AWS) y horizontal (PgBouncer en modo Transaction Pooling, 3 réplicas de lectura y particionado para PostgreSQL; fragmentación horizontal por *Hashed Shard Key* de `product_id` en MongoDB).
+    *   **Plan de Migración Económico y Técnico:** Hoja de ruta para migrar de entornos compartidos gratuitos a entornos empresariales dedicados (estimación mensual de ~$800 USD) y estrategia de **migración con cero tiempo de inactividad** mediante replicación lógica WAL (AWS DMS / pglogical) y Atlas Live Migration.
+    *   **CI/CD de Esquemas de Datos:** Integración continua en GitHub Actions usando **Prisma Migrations** o **Liquibase** aplicando el patrón de cambios seguros *Expand-and-Contract*.
+    *   **Componentes de Soporte:** Arquitectura integrada con **Redis** para almacenamiento en caché, **Meilisearch** para búsquedas tolerantes a errores ortográficos, y **Datadog / Prometheus + Grafana** para observabilidad de hardware y métricas de consultas de bases de datos.
